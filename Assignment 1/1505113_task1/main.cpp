@@ -13,24 +13,31 @@ int drawgrid;
 int drawaxes;
 double angle;
 
+double ang=3;
+
+
 struct point
 {
 	double x,y,z;
 };
+
+point pos,u,l,r;
 
 
 void drawAxes()
 {
 	if(drawaxes==1)
 	{
-		glColor3f(1.0, 1.0, 1.0);
 		glBegin(GL_LINES);{
+		    glColor3f(1.0, 1.0, 1.0);
 			glVertex3f( 100,0,0);
 			glVertex3f(-100,0,0);
 
+            glColor3f(1.0, 0.0, 0.0);
 			glVertex3f(0,-100,0);
 			glVertex3f(0, 100,0);
 
+            glColor3f(0.0, 1.0, 0.0);
 			glVertex3f(0,0, 100);
 			glVertex3f(0,0,-100);
 		}glEnd();
@@ -90,35 +97,6 @@ void drawCircle(double radius,int segments)
     {
         glBegin(GL_LINES);
         {
-			glVertex3f(points[i].x,points[i].y,0);
-			glVertex3f(points[i+1].x,points[i+1].y,0);
-        }
-        glEnd();
-    }
-}
-
-void drawCone(double radius,double height,int segments)
-{
-    int i;
-    double shade;
-    struct point points[100];
-    //generate points
-    for(i=0;i<=segments;i++)
-    {
-        points[i].x=radius*cos(((double)i/(double)segments)*2*pi);
-        points[i].y=radius*sin(((double)i/(double)segments)*2*pi);
-    }
-    //draw triangles using generated points
-    for(i=0;i<segments;i++)
-    {
-        //create shading effect
-        if(i<segments/2)shade=2*(double)i/(double)segments;
-        else shade=2*(1.0-(double)i/(double)segments);
-        glColor3f(shade,shade,shade);
-
-        glBegin(GL_TRIANGLES);
-        {
-            glVertex3f(0,0,height);
 			glVertex3f(points[i].x,points[i].y,0);
 			glVertex3f(points[i+1].x,points[i+1].y,0);
         }
@@ -195,11 +173,65 @@ void drawSS()
     drawSquare(5);
 }
 
+
+
+// parameter 1 : which vector to be rotated
+// parameter 2 : In which direction to do the rotation, we denote this by angle
+// parameter 3 : To which vector's perspective the rotation is done
+
+point CameraRotation(point vec,int ang, point vecpers)
+{
+    double tempx,tempy,tempz;
+    point newvec,newtemp,rvec;
+
+    tempx= (vec.y*vecpers.z) - (vec.z*vecpers.y);
+    tempy= (vec.z*vecpers.x) - (vec.x*vecpers.z);
+    tempz= (vec.x*vecpers.y) - (vec.y*vecpers.x);
+
+    newvec.x= vec.x * cos(ang*pi/180);
+    newvec.y= vec.y * cos(ang*pi/180);
+    newvec.z= vec.z * cos(ang*pi/180);
+
+    newtemp.x=tempx * sin(ang*pi/180);
+    newtemp.y=tempy * sin(ang*pi/180);
+    newtemp.z=tempz * sin(ang*pi/180);
+
+    rvec.x=newvec.x + newtemp.x;
+    rvec.y=newvec.y + newtemp.y;
+    rvec.z=newvec.z + newtemp.z;
+
+    return rvec;
+
+}
+
+
+
 void keyboardListener(unsigned char key, int x,int y){
 	switch(key){
 
 		case '1':
-			drawgrid=1-drawgrid;
+            l=CameraRotation(l,-ang,u);
+            r=CameraRotation(r,-ang,u);
+			break;
+		case '2':
+            l=CameraRotation(l,ang,u);
+            r=CameraRotation(r,ang,u);
+			break;
+		case '3':
+            l=CameraRotation(l,-ang,r);
+            u=CameraRotation(u,-ang,r);
+			break;
+		case '4':
+            l=CameraRotation(l,ang,r);
+            u=CameraRotation(u,ang,r);
+			break;
+		case '5':
+            u=CameraRotation(u,-ang,l);
+            r=CameraRotation(r,-ang,l);
+			break;
+		case '6':
+            u=CameraRotation(u,ang,l);
+            r=CameraRotation(r,ang,l);
 			break;
 
 		default:
@@ -211,22 +243,36 @@ void keyboardListener(unsigned char key, int x,int y){
 void specialKeyListener(int key, int x,int y){
 	switch(key){
 		case GLUT_KEY_DOWN:		//down arrow key
-			cameraHeight -= 3.0;
+			pos.x-=l.x;
+			pos.y-=l.y;
+			pos.z-=l.z;
 			break;
 		case GLUT_KEY_UP:		// up arrow key
-			cameraHeight += 3.0;
+			pos.x+=l.x;
+			pos.y+=l.y;
+			pos.z+=l.z;
 			break;
 
 		case GLUT_KEY_RIGHT:
-			cameraAngle += 0.03;
+			pos.x+=r.x;
+			pos.y+=r.y;
+			pos.z+=r.z;
 			break;
 		case GLUT_KEY_LEFT:
-			cameraAngle -= 0.03;
+			pos.x-=r.x;
+			pos.y-=r.y;
+			pos.z-=r.z;
 			break;
 
 		case GLUT_KEY_PAGE_UP:
+		    pos.x+=u.x;
+			pos.y+=u.y;
+			pos.z+=u.z;
 			break;
 		case GLUT_KEY_PAGE_DOWN:
+		    pos.x-=u.x;
+			pos.y-=u.y;
+			pos.z-=u.z;
 			break;
 
 		case GLUT_KEY_INSERT:
@@ -289,7 +335,7 @@ void display(){
 
 	//gluLookAt(100,100,100,	0,0,0,	0,0,1);
 	//gluLookAt(200*cos(cameraAngle), 200*sin(cameraAngle), cameraHeight,		0,0,0,		0,0,1);
-	gluLookAt(0,0,200,	0,0,0,	0,1,0);
+	gluLookAt(pos.x,pos.y,pos.z,	pos.x+l.x,pos.y+l.y,pos.z+l.z,	u.x,u.y,u.z);
 
 
 	//again select MODEL-VIEW
@@ -336,6 +382,24 @@ void init(){
 	cameraHeight=150.0;
 	cameraAngle=1.0;
 	angle=0;
+
+	//initializing pos,u,r,l
+
+	pos.x=100;
+	pos.y=100;
+	pos.z=0;
+
+	u.x=0;
+	u.y=0;
+	u.z=1;
+
+	r.x= -(1/sqrt(2));
+	r.y= 1/sqrt(2);
+	r.z= 0;
+
+	l.x= -(1/sqrt(2));
+	l.y= -(1/sqrt(2));
+	l.z= 0;
 
 	//clear the screen
 	glClearColor(0,0,0,0);
