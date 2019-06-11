@@ -33,14 +33,13 @@ void drawAxes()
         glBegin(GL_LINES);
         {
             glColor3f(1.0, 1.0, 1.0);
+
             glVertex3f( 100,0,0);
             glVertex3f(-100,0,0);
 
-            glColor3f(1.0, 0.0, 0.0);
             glVertex3f(0,-100,0);
             glVertex3f(0, 100,0);
 
-            glColor3f(0.0, 1.0, 0.0);
             glVertex3f(0,0, 100);
             glVertex3f(0,0,-100);
         }
@@ -162,12 +161,11 @@ void drawCylinder(double radius,double height)
     int i;
     struct point points[100];
     double segments=100;
-    glColor3f(0.7,0.7,0.7);
     //generate points
     for(i=0; i<segments; i++)
     {
-        points[i].x=radius*cos(((double)i/(double)segments)*(pi / 2));
-        points[i].y=radius*sin(((double)i/(double)segments)*(pi / 2));
+        points[i].x=radius*cos(((double)i/(double)segments)*(pi/2+0.1));
+        points[i].y=radius*sin(((double)i/(double)segments)*(pi/2+0.1));
     }
 
 
@@ -182,6 +180,14 @@ void drawCylinder(double radius,double height)
         }
         glEnd();
 
+        glBegin(GL_QUADS);
+        {
+            glVertex3f(points[i].x,points[i].y,0);
+            glVertex3f(points[i].x,points[i].y,-height);
+            glVertex3f(points[i+1].x,points[i+1].y,-height);
+            glVertex3f(points[i+1].x,points[i+1].y,0);
+        }
+        glEnd();
 
     }
 
@@ -231,7 +237,7 @@ void DrawCube()
 }
 
 
-void Draw8sphere()
+void Draw8Sphere()
 {
     glColor3f(1.0,0.0,0.0);
 
@@ -294,6 +300,104 @@ void Draw8sphere()
 }
 
 
+void Draw12Cylinder()
+{
+    glColor3f(0.0,1.0,0.0);
+
+    double rad=squaremaxboundary-squareboundary;
+    double height= squareboundary;
+
+    ///around 4 arms
+    glPushMatrix();
+    glTranslated(squareboundary,squareboundary,0);
+    drawCylinder(rad,height);
+    glPopMatrix();
+
+    glPushMatrix();
+    glRotated(180,1,0,0);
+    glTranslated(squareboundary,squareboundary,0);
+    drawCylinder(rad,height);
+    glPopMatrix();
+
+    glPushMatrix();
+    glRotated(180,0,1,0);
+    glRotated(180,1,0,0);
+    glTranslated(squareboundary,squareboundary,0);
+    drawCylinder(rad,height);
+    glPopMatrix();
+
+    glPushMatrix();
+    glRotated(180,1,0,0);
+    glRotated(180,0,1,0);
+    glRotated(180,1,0,0);
+    glTranslated(squareboundary,squareboundary,0);
+    drawCylinder(rad,height);
+    glPopMatrix();
+
+    ///lower 4 arms
+    glPushMatrix();
+    glRotated(90,0,1,0);
+    glTranslated(squareboundary,squareboundary,0);
+    drawCylinder(rad,height);
+    glPopMatrix();
+
+    glPushMatrix();
+    glRotated(180,0,0,1);
+    glRotated(90,0,1,0);
+    glTranslated(squareboundary,squareboundary,0);
+    drawCylinder(rad,height);
+    glPopMatrix();
+
+    glPushMatrix();
+    glRotated(-90,0,0,1);
+    glRotated(90,0,1,0);
+    glTranslated(squareboundary,squareboundary,0);
+    drawCylinder(rad,height);
+    glPopMatrix();
+
+    glPushMatrix();
+    glRotated(90,0,0,1);
+    glRotated(90,0,1,0);
+    glTranslated(squareboundary,squareboundary,0);
+    drawCylinder(rad,height);
+    glPopMatrix();
+
+
+
+   ///upper 4 arms
+    glPushMatrix();
+    glRotated(180,1,0,0);
+    glRotated(90,0,1,0);
+    glTranslated(squareboundary,squareboundary,0);
+    drawCylinder(rad,height);
+    glPopMatrix();
+
+    glPushMatrix();
+    glRotated(180,0,0,1);
+    glRotated(180,1,0,0);
+    glRotated(90,0,1,0);
+    glTranslated(squareboundary,squareboundary,0);
+    drawCylinder(rad,height);
+    glPopMatrix();
+
+    glPushMatrix();
+    glRotated(90,0,0,1);
+    glRotated(180,1,0,0);
+    glRotated(90,0,1,0);
+    glTranslated(squareboundary,squareboundary,0);
+    drawCylinder(rad,height);
+    glPopMatrix();
+
+    glPushMatrix();
+    glRotated(-90,0,0,1);
+    glRotated(180,1,0,0);
+    glRotated(90,0,1,0);
+    glTranslated(squareboundary,squareboundary,0);
+    drawCylinder(rad,height);
+    glPopMatrix();
+
+
+}
 
 
 // parameter 1 : which vector to be rotated
@@ -482,18 +586,9 @@ void display()
 
     drawAxes();
     drawGrid();
-    //DrawCube();
-    //Draw8sphere();
-    drawCylinder(10,30);
-
-    //glColor3f(1,0,0);
-    //drawSquare(10);
-
-    //drawCircle(30,24);
-
-    //drawCone(20,50,24);
-
-    //drawSphere(30,24,20);
+    DrawCube();
+    Draw8Sphere();
+    Draw12Cylinder();
 
     //ADD this line in the end --- if you use double buffer (i.e. GL_DOUBLE)
     glutSwapBuffers();
