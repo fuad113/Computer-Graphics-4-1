@@ -14,6 +14,8 @@ int drawaxes;
 double angle;
 
 double ang=3;
+double squareboundary=30;
+double squaremaxboundary=30;
 
 
 struct point
@@ -71,12 +73,12 @@ void drawGrid()
 
 void drawSquare(double a)
 {
-    //glColor3f(1.0,0.0,0.0);
+
 	glBegin(GL_QUADS);{
-		glVertex3f( a, a,2);
-		glVertex3f( a,-a,2);
-		glVertex3f(-a,-a,2);
-		glVertex3f(-a, a,2);
+		glVertex3f( a, a,0);
+		glVertex3f( a,-a,0);
+		glVertex3f(-a,-a,0);
+		glVertex3f(-a, a,0);
 	}glEnd();
 }
 
@@ -117,15 +119,15 @@ void drawSphere(double radius,int slices,int stacks)
 		r=radius*cos(((double)i/(double)stacks)*(pi/2));
 		for(j=0;j<=slices;j++)
 		{
-			points[i][j].x=r*cos(((double)j/(double)slices)*2*pi);
-			points[i][j].y=r*sin(((double)j/(double)slices)*2*pi);
+			points[i][j].x=r*cos(((double)j/(double)slices)*pi/2);
+			points[i][j].y=r*sin(((double)j/(double)slices)*pi/2);
 			points[i][j].z=h;
 		}
 	}
 	//draw quads using generated points
 	for(i=0;i<stacks;i++)
 	{
-        glColor3f((double)i/(double)stacks,(double)i/(double)stacks,(double)i/(double)stacks);
+        //glColor3f((double)i/(double)stacks,(double)i/(double)stacks,(double)i/(double)stacks);
 		for(j=0;j<slices;j++)
 		{
 			glBegin(GL_QUADS);{
@@ -135,42 +137,119 @@ void drawSphere(double radius,int slices,int stacks)
 				glVertex3f(points[i+1][j+1].x,points[i+1][j+1].y,points[i+1][j+1].z);
 				glVertex3f(points[i+1][j].x,points[i+1][j].y,points[i+1][j].z);
                 //lower hemisphere
-                glVertex3f(points[i][j].x,points[i][j].y,-points[i][j].z);
+               /* glVertex3f(points[i][j].x,points[i][j].y,-points[i][j].z);
 				glVertex3f(points[i][j+1].x,points[i][j+1].y,-points[i][j+1].z);
 				glVertex3f(points[i+1][j+1].x,points[i+1][j+1].y,-points[i+1][j+1].z);
-				glVertex3f(points[i+1][j].x,points[i+1][j].y,-points[i+1][j].z);
+				glVertex3f(points[i+1][j].x,points[i+1][j].y,-points[i+1][j].z);*/
 			}glEnd();
 		}
 	}
 }
 
 
-void drawSS()
+
+void DrawCube()
 {
-    glColor3f(1,0,0);
-    drawSquare(20);
+    glColor3f(1.0,1.0,1.0);
 
-    glRotatef(angle,0,0,1);
-    glTranslatef(110,0,0);
-    glRotatef(2*angle,0,0,1);
-    glColor3f(0,1,0);
-    drawSquare(15);
-
+    ///top and bottom of the cube
     glPushMatrix();
-    {
-        glRotatef(angle,0,0,1);
-        glTranslatef(60,0,0);
-        glRotatef(2*angle,0,0,1);
-        glColor3f(0,0,1);
-        drawSquare(10);
-    }
+    glTranslated(0,0,squaremaxboundary);
+    drawSquare(squareboundary);
     glPopMatrix();
 
-    glRotatef(3*angle,0,0,1);
-    glTranslatef(40,0,0);
-    glRotatef(4*angle,0,0,1);
-    glColor3f(1,1,0);
-    drawSquare(5);
+    glPushMatrix();
+    glTranslated(0,0,-squaremaxboundary);
+    drawSquare(squareboundary);
+    glPopMatrix();
+
+    ///sides of the cube
+    glPushMatrix();
+    glRotated(90,1,0,0);
+    glTranslated(0,0,squaremaxboundary);
+    drawSquare(squareboundary);
+    glPopMatrix();
+
+    glPushMatrix();
+    glRotated(90,1,0,0);
+    glTranslated(0,0,-squaremaxboundary);
+    drawSquare(squareboundary);
+    glPopMatrix();
+
+    glPushMatrix();
+    glRotated(90,0,1,0);
+    glTranslated(0,0,squaremaxboundary);
+    drawSquare(squareboundary);
+    glPopMatrix();
+
+    glPushMatrix();
+    glRotated(90,0,1,0);
+    glTranslated(0,0,-squaremaxboundary);
+    drawSquare(squareboundary);
+    glPopMatrix();
+
+}
+
+
+void Draw8sphere()
+{
+    glColor3f(1.0,0.0,0.0);
+
+    int slices=40;
+    int stacks=40;
+
+
+    glPushMatrix();
+    glTranslated(squareboundary,squareboundary,squareboundary);
+    drawSphere(squaremaxboundary-squareboundary,stacks,slices);
+    glPopMatrix();
+
+    glPushMatrix();
+    glRotated(90,0,0,1);
+    glTranslated(squareboundary,squareboundary,squareboundary);
+    drawSphere(squaremaxboundary-squareboundary,stacks,slices);
+    glPopMatrix();
+
+    glPushMatrix();
+    glRotated(180,0,0,1);
+    glTranslated(squareboundary,squareboundary,squareboundary);
+    drawSphere(squaremaxboundary-squareboundary,stacks,slices);
+    glPopMatrix();
+
+    glPushMatrix();
+    glRotated(270,0,0,1);
+    glTranslated(squareboundary,squareboundary,squareboundary);
+    drawSphere(squaremaxboundary-squareboundary,stacks,slices);
+    glPopMatrix();
+
+
+
+    glPushMatrix();
+    glRotated(90,0,1,0);
+    glTranslated(squareboundary,squareboundary,squareboundary);
+    drawSphere(squaremaxboundary-squareboundary,stacks,slices);
+    glPopMatrix();
+
+
+    glPushMatrix();
+    glRotated(180,0,1,0);
+    glTranslated(squareboundary,squareboundary,squareboundary);
+    drawSphere(squaremaxboundary-squareboundary,stacks,slices);
+    glPopMatrix();
+
+    glPushMatrix();
+    glRotated(180,1,0,0);
+    glTranslated(squareboundary,squareboundary,squareboundary);
+    drawSphere(squaremaxboundary-squareboundary,stacks,slices);
+    glPopMatrix();
+
+    glPushMatrix();
+    glRotated(90,0,1,0);
+    glRotated(180,1,0,0);
+    glTranslated(squareboundary,squareboundary,squareboundary);
+    drawSphere(squaremaxboundary-squareboundary,stacks,slices);
+    glPopMatrix();
+
 }
 
 
@@ -279,8 +358,12 @@ void specialKeyListener(int key, int x,int y){
 			break;
 
 		case GLUT_KEY_HOME:
+		    squareboundary--;
+		    squareboundary=max(0,squareboundary);
 			break;
 		case GLUT_KEY_END:
+		    squareboundary++;
+		    squareboundary=min(squareboundary,squaremaxboundary);
 			break;
 
 		default:
@@ -349,20 +432,17 @@ void display(){
 
 	drawAxes();
 	drawGrid();
+	DrawCube();
+	Draw8sphere();
 
     //glColor3f(1,0,0);
     //drawSquare(10);
-
-    drawSS();
 
     //drawCircle(30,24);
 
     //drawCone(20,50,24);
 
 	//drawSphere(30,24,20);
-
-
-
 
 	//ADD this line in the end --- if you use double buffer (i.e. GL_DOUBLE)
 	glutSwapBuffers();
