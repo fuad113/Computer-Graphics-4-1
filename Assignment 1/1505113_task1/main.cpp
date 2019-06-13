@@ -200,38 +200,50 @@ void DrawCube()
 
     ///top and bottom of the cube
     glPushMatrix();
-    glTranslated(0,0,squaremaxboundary);
-    drawSquare(squareboundary);
+    {
+        glTranslated(0,0,squaremaxboundary);
+        drawSquare(squareboundary);
+    }
     glPopMatrix();
 
     glPushMatrix();
-    glTranslated(0,0,-squaremaxboundary);
-    drawSquare(squareboundary);
+    {
+        glTranslated(0,0,-squaremaxboundary);
+        drawSquare(squareboundary);
+    }
     glPopMatrix();
 
     ///sides of the cube
     glPushMatrix();
-    glRotated(90,1,0,0);
-    glTranslated(0,0,squaremaxboundary);
-    drawSquare(squareboundary);
+    {
+        glRotated(90,1,0,0);
+        glTranslated(0,0,squaremaxboundary);
+        drawSquare(squareboundary);
+    }
     glPopMatrix();
 
     glPushMatrix();
-    glRotated(90,1,0,0);
-    glTranslated(0,0,-squaremaxboundary);
-    drawSquare(squareboundary);
+    {
+        glRotated(90,1,0,0);
+        glTranslated(0,0,-squaremaxboundary);
+        drawSquare(squareboundary);
+    }
     glPopMatrix();
 
     glPushMatrix();
-    glRotated(90,0,1,0);
-    glTranslated(0,0,squaremaxboundary);
-    drawSquare(squareboundary);
+    {
+        glRotated(90,0,1,0);
+        glTranslated(0,0,squaremaxboundary);
+        drawSquare(squareboundary);
+    }
     glPopMatrix();
 
     glPushMatrix();
-    glRotated(90,0,1,0);
-    glTranslated(0,0,-squaremaxboundary);
-    drawSquare(squareboundary);
+    {
+        glRotated(90,0,1,0);
+        glTranslated(0,0,-squaremaxboundary);
+        drawSquare(squareboundary);
+    }
     glPopMatrix();
 
 }
@@ -246,55 +258,71 @@ void Draw8Sphere()
 
     /// upper 4 corners
     glPushMatrix();
-    glTranslated(squareboundary,squareboundary,squareboundary);
-    drawSphere(squaremaxboundary-squareboundary,stacks,slices);
+    {
+        glTranslated(squareboundary,squareboundary,squareboundary);
+        drawSphere(squaremaxboundary-squareboundary,stacks,slices);
+    }
     glPopMatrix();
 
     glPushMatrix();
-    glRotated(90,0,0,1);
-    glTranslated(squareboundary,squareboundary,squareboundary);
-    drawSphere(squaremaxboundary-squareboundary,stacks,slices);
+    {
+        glRotated(90,0,0,1);
+        glTranslated(squareboundary,squareboundary,squareboundary);
+        drawSphere(squaremaxboundary-squareboundary,stacks,slices);
+    }
     glPopMatrix();
 
     glPushMatrix();
-    glRotated(180,0,0,1);
-    glTranslated(squareboundary,squareboundary,squareboundary);
-    drawSphere(squaremaxboundary-squareboundary,stacks,slices);
+    {
+        glRotated(180,0,0,1);
+        glTranslated(squareboundary,squareboundary,squareboundary);
+        drawSphere(squaremaxboundary-squareboundary,stacks,slices);
+    }
     glPopMatrix();
 
     glPushMatrix();
-    glRotated(270,0,0,1);
-    glTranslated(squareboundary,squareboundary,squareboundary);
-    drawSphere(squaremaxboundary-squareboundary,stacks,slices);
+    {
+        glRotated(270,0,0,1);
+        glTranslated(squareboundary,squareboundary,squareboundary);
+        drawSphere(squaremaxboundary-squareboundary,stacks,slices);
+    }
     glPopMatrix();
 
 
     ///lower 4 corners
 
     glPushMatrix();
-    glRotated(90,0,1,0);
-    glTranslated(squareboundary,squareboundary,squareboundary);
-    drawSphere(squaremaxboundary-squareboundary,stacks,slices);
+    {
+        glRotated(90,0,1,0);
+        glTranslated(squareboundary,squareboundary,squareboundary);
+        drawSphere(squaremaxboundary-squareboundary,stacks,slices);
+    }
     glPopMatrix();
 
 
     glPushMatrix();
-    glRotated(180,0,1,0);
-    glTranslated(squareboundary,squareboundary,squareboundary);
-    drawSphere(squaremaxboundary-squareboundary,stacks,slices);
+    {
+        glRotated(180,0,1,0);
+        glTranslated(squareboundary,squareboundary,squareboundary);
+        drawSphere(squaremaxboundary-squareboundary,stacks,slices);
+    }
     glPopMatrix();
 
     glPushMatrix();
-    glRotated(180,1,0,0);
-    glTranslated(squareboundary,squareboundary,squareboundary);
-    drawSphere(squaremaxboundary-squareboundary,stacks,slices);
+    {
+        glRotated(180,1,0,0);
+        glTranslated(squareboundary,squareboundary,squareboundary);
+        drawSphere(squaremaxboundary-squareboundary,stacks,slices);
+    }
     glPopMatrix();
 
     glPushMatrix();
-    glRotated(90,0,1,0);
-    glRotated(180,1,0,0);
-    glTranslated(squareboundary,squareboundary,squareboundary);
-    drawSphere(squaremaxboundary-squareboundary,stacks,slices);
+    {
+        glRotated(90,0,1,0);
+        glRotated(180,1,0,0);
+        glTranslated(squareboundary,squareboundary,squareboundary);
+        drawSphere(squaremaxboundary-squareboundary,stacks,slices);
+    }
     glPopMatrix();
 
 }
@@ -309,91 +337,115 @@ void Draw12Cylinder()
 
     ///around 4 arms
     glPushMatrix();
-    glTranslated(squareboundary,squareboundary,0);
-    drawCylinder(rad,height);
+    {
+        glTranslated(squareboundary,squareboundary,0);
+        drawCylinder(rad,height);
+    }
     glPopMatrix();
 
     glPushMatrix();
-    glRotated(180,1,0,0);
-    glTranslated(squareboundary,squareboundary,0);
-    drawCylinder(rad,height);
+    {
+        glRotated(180,1,0,0);
+        glTranslated(squareboundary,squareboundary,0);
+        drawCylinder(rad,height);
+    }
     glPopMatrix();
 
     glPushMatrix();
-    glRotated(180,0,1,0);
-    glRotated(180,1,0,0);
-    glTranslated(squareboundary,squareboundary,0);
-    drawCylinder(rad,height);
+    {
+        glRotated(180,0,1,0);
+        glRotated(180,1,0,0);
+        glTranslated(squareboundary,squareboundary,0);
+        drawCylinder(rad,height);
+    }
     glPopMatrix();
 
     glPushMatrix();
-    glRotated(180,1,0,0);
-    glRotated(180,0,1,0);
-    glRotated(180,1,0,0);
-    glTranslated(squareboundary,squareboundary,0);
-    drawCylinder(rad,height);
+    {
+        glRotated(180,1,0,0);
+        glRotated(180,0,1,0);
+        glRotated(180,1,0,0);
+        glTranslated(squareboundary,squareboundary,0);
+        drawCylinder(rad,height);
+    }
     glPopMatrix();
 
     ///lower 4 arms
     glPushMatrix();
-    glRotated(90,0,1,0);
-    glTranslated(squareboundary,squareboundary,0);
-    drawCylinder(rad,height);
+    {
+        glRotated(90,0,1,0);
+        glTranslated(squareboundary,squareboundary,0);
+        drawCylinder(rad,height);
+    }
     glPopMatrix();
 
     glPushMatrix();
-    glRotated(180,0,0,1);
-    glRotated(90,0,1,0);
-    glTranslated(squareboundary,squareboundary,0);
-    drawCylinder(rad,height);
+    {
+        glRotated(180,0,0,1);
+        glRotated(90,0,1,0);
+        glTranslated(squareboundary,squareboundary,0);
+        drawCylinder(rad,height);
+    }
     glPopMatrix();
 
     glPushMatrix();
-    glRotated(-90,0,0,1);
-    glRotated(90,0,1,0);
-    glTranslated(squareboundary,squareboundary,0);
-    drawCylinder(rad,height);
+    {
+        glRotated(-90,0,0,1);
+        glRotated(90,0,1,0);
+        glTranslated(squareboundary,squareboundary,0);
+        drawCylinder(rad,height);
+    }
     glPopMatrix();
 
     glPushMatrix();
-    glRotated(90,0,0,1);
-    glRotated(90,0,1,0);
-    glTranslated(squareboundary,squareboundary,0);
-    drawCylinder(rad,height);
+    {
+        glRotated(90,0,0,1);
+        glRotated(90,0,1,0);
+        glTranslated(squareboundary,squareboundary,0);
+        drawCylinder(rad,height);
+    }
     glPopMatrix();
 
 
 
-   ///upper 4 arms
+    ///upper 4 arms
     glPushMatrix();
-    glRotated(180,1,0,0);
-    glRotated(90,0,1,0);
-    glTranslated(squareboundary,squareboundary,0);
-    drawCylinder(rad,height);
+    {
+        glRotated(180,1,0,0);
+        glRotated(90,0,1,0);
+        glTranslated(squareboundary,squareboundary,0);
+        drawCylinder(rad,height);
+    }
     glPopMatrix();
 
     glPushMatrix();
-    glRotated(180,0,0,1);
-    glRotated(180,1,0,0);
-    glRotated(90,0,1,0);
-    glTranslated(squareboundary,squareboundary,0);
-    drawCylinder(rad,height);
+    {
+        glRotated(180,0,0,1);
+        glRotated(180,1,0,0);
+        glRotated(90,0,1,0);
+        glTranslated(squareboundary,squareboundary,0);
+        drawCylinder(rad,height);
+    }
     glPopMatrix();
 
     glPushMatrix();
-    glRotated(90,0,0,1);
-    glRotated(180,1,0,0);
-    glRotated(90,0,1,0);
-    glTranslated(squareboundary,squareboundary,0);
-    drawCylinder(rad,height);
+    {
+        glRotated(90,0,0,1);
+        glRotated(180,1,0,0);
+        glRotated(90,0,1,0);
+        glTranslated(squareboundary,squareboundary,0);
+        drawCylinder(rad,height);
+    }
     glPopMatrix();
 
     glPushMatrix();
-    glRotated(-90,0,0,1);
-    glRotated(180,1,0,0);
-    glRotated(90,0,1,0);
-    glTranslated(squareboundary,squareboundary,0);
-    drawCylinder(rad,height);
+    {
+        glRotated(-90,0,0,1);
+        glRotated(180,1,0,0);
+        glRotated(90,0,1,0);
+        glTranslated(squareboundary,squareboundary,0);
+        drawCylinder(rad,height);
+    }
     glPopMatrix();
 
 
