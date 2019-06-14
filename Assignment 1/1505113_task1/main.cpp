@@ -9,7 +9,6 @@
 
 double cameraHeight;
 double cameraAngle;
-int drawgrid;
 int drawaxes;
 double angle;
 
@@ -48,32 +47,6 @@ void drawAxes()
 }
 
 
-void drawGrid()
-{
-    int i;
-    if(drawgrid==1)
-    {
-        glColor3f(0.6, 0.6, 0.6);	//grey
-        glBegin(GL_LINES);
-        {
-            for(i=-8; i<=8; i++)
-            {
-
-                if(i==0)
-                    continue;	//SKIP the MAIN axes
-
-                //lines parallel to Y-axis
-                glVertex3f(i*10, -90, 0);
-                glVertex3f(i*10,  90, 0);
-
-                //lines parallel to X-axis
-                glVertex3f(-90, i*10, 0);
-                glVertex3f( 90, i*10, 0);
-            }
-        }
-        glEnd();
-    }
-}
 
 void drawSquare(double a)
 {
@@ -88,29 +61,6 @@ void drawSquare(double a)
     glEnd();
 }
 
-
-void drawCircle(double radius,int segments)
-{
-    int i;
-    struct point points[100];
-    glColor3f(0.7,0.7,0.7);
-    //generate points
-    for(i=0; i<=segments; i++)
-    {
-        points[i].x=radius*cos(((double)i/(double)segments)*2*pi);
-        points[i].y=radius*sin(((double)i/(double)segments)*2*pi);
-    }
-    //draw segments using generated points
-    for(i=0; i<segments; i++)
-    {
-        glBegin(GL_LINES);
-        {
-            glVertex3f(points[i].x,points[i].y,0);
-            glVertex3f(points[i+1].x,points[i+1].y,0);
-        }
-        glEnd();
-    }
-}
 
 
 void drawSphere(double radius,int slices,int stacks)
@@ -637,7 +587,6 @@ void display()
     //add objects
 
     drawAxes();
-    drawGrid();
     DrawCube();
     Draw8Sphere();
     Draw12Cylinder();
@@ -657,7 +606,6 @@ void animate()
 void init()
 {
     //codes for initialization
-    drawgrid=0;
     drawaxes=1;
     cameraHeight=150.0;
     cameraAngle=1.0;

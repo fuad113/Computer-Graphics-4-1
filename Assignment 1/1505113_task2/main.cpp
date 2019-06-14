@@ -10,7 +10,6 @@
 double cameraHeight;
 double cameraAngle;
 int drawgrid;
-int drawaxes;
 double angle;
 
 double wheelradius=30;
@@ -24,7 +23,6 @@ struct point
 struct point positionvector;
 struct point direcvector;
 struct point perpvector;
-
 
 void drawGrid()
 {
@@ -52,7 +50,7 @@ void drawGrid()
 
 void drawSquare(double a)
 {
-    //glColor3f(1.0,0.0,0.0);
+    glColor3f(1.0,0.0,0.0);
     glBegin(GL_QUADS);
     {
         glVertex3f( a, 4,0);
@@ -78,10 +76,13 @@ void drawCylinder(double radius,double height)
     }
 
 
+     glColor3f(0.0,1.0,0.0);
+
     for(int i=0; i<segments-1; i++)
     {
         glBegin(GL_QUADS);
         {
+
             glVertex3f(points[i].x,points[i].y,0);
             glVertex3f(points[i].x,points[i].y,height);
             glVertex3f(points[i+1].x,points[i+1].y,height);
@@ -98,6 +99,7 @@ void drawCylinder(double radius,double height)
 
     glBegin(GL_QUADS);
     {
+        glColor3f(0.0,1.0,0.0);
         glVertex3f(points[segments-1].x,points[segments-1].y,0);
         glVertex3f(points[segments-1].x,points[segments-1].y,height);
         glVertex3f(points[0].x,points[0].y,height);
@@ -112,8 +114,6 @@ void drawCylinder(double radius,double height)
 
 
 }
-
-
 
 
 void DrawWheel()
@@ -244,7 +244,7 @@ void mouseListener(int button, int state, int x, int y) 	//x, y is the x-y of th
     case GLUT_LEFT_BUTTON:
         if(state == GLUT_DOWN) 		// 2 times?? in ONE click? -- solution is checking DOWN or UP
         {
-            drawaxes=1-drawaxes;
+            drawgrid=1-drawgrid;
         }
         break;
 
@@ -252,7 +252,6 @@ void mouseListener(int button, int state, int x, int y) 	//x, y is the x-y of th
         break;
     }
 }
-
 
 
 void display()
@@ -309,7 +308,6 @@ void init()
 {
     //codes for initialization
     drawgrid=1;
-    drawaxes=0;
     cameraHeight=150.0;
     cameraAngle=1.0;
     angle=0;
