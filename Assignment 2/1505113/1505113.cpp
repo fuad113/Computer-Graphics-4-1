@@ -6,13 +6,15 @@ using namespace std;
 
 struct point
 {
-    int x,y,z;
+    double x,y,z;
 };
 
 
 struct point eye;
 struct point look;
 struct point up;
+
+double fovy,aspectratio,near,far;
 
 
 class matrix{
@@ -158,10 +160,11 @@ int main()
     stage3.open("stage3.txt");
 
 
-    ///input of the 1st 3 lines of scene.txt
+    ///input of the 1st 4 lines of scene.txt
     cin>> eye.x >> eye.y >> eye.z;
     cin>> look.x >>  look.y >> look.z;
     cin>> up.x >> up.y >> up.z;
+    cin>> fovy >> aspectratio >> near >> far;
 
 
     ///taking the stack
@@ -219,7 +222,7 @@ int main()
 
         mattriangle=multiplication(stck.top().first,triangle1);
 
-        ///printing the matrix in stage1.txt
+        ///working for stage 1
 
         for(int i=0;i<3;i++)
         {
@@ -227,15 +230,119 @@ int main()
             {
                 if(j!=2)
                 {
-                    stage1<< setprecision(7) << mattriangle.mat[j][i] << " ";
+                    stage1<<fixed<< setprecision(7) << mattriangle.mat[j][i] << " ";
                 }
                 else
                 {
-                    stage1<< setprecision(7) << mattriangle.mat[j][i] ;
+                    stage1<<fixed << setprecision(7) << mattriangle.mat[j][i] ;
                 }
             }
             stage1<< "\n" ;
         }
+
+        stage1<< "\n";
+
+        ///working for stage 2
+
+        struct point l,r,u;
+
+        ///making l
+        l.x=look.x-eye.x;
+        l.y=look.y-eye.y;
+        l.z=look.z-eye.z;
+
+        ///normalize l
+
+        double dl=sqrt(l.x*l.x + l.y*l.y + l.z*l.z);
+
+        l.x=l.x/dl;
+        l.y=l.y/dl;
+        l.z=l.z/dl;
+
+        ///making r
+        r= crossproduct(l,up);
+
+        ///normalize r
+
+        double dr=sqrt(r.x*r.x + r.y*r.y + r.z*r.z);
+
+        r.x=r.x/dr;
+        r.y=r.y/dr;
+        r.z=r.z/dr;
+
+        ///making u
+
+        u= crossproduct(r,l);
+
+        ///making T matrix
+
+        matrix T;
+
+        T.makeidentitymatrix();
+
+        T.mat[0][3]=-eye.x;
+        T.mat[1][3]=-eye.y;
+        T.mat[2][3]=-eye.z;
+
+        ///making R matrix
+
+        matrix R;
+
+        R.mat[0][0]=r.x;
+        R.mat[0][1]=r.y;
+        R.mat[0][2]=r.z;
+
+        R.mat[1][0]=u.x;
+        R.mat[1][1]=u.y;
+        R.mat[1][2]=u.z;
+
+        R.mat[2][0]=-l.x;
+        R.mat[2][1]=-l.y;
+        R.mat[2][2]=-l.z;
+
+        R.mat[3][3]=1.0;
+
+        ///making the view transformation matrix V. Here, V=RT
+
+        matrix V;
+
+        V=multiplication(R,T);
+
+        ///applying V on stage 1 matrix to get stage 2 matrix
+
+        matrix mattriangle2;
+
+        mattriangle2=multiplication(V,mattriangle);
+
+        for(int i=0;i<3;i++)
+        {
+            for(int j=0;j<3;j++)
+            {
+                if(j!=2)
+                {
+                    stage2<<fixed<< setprecision(7) << mattriangle2.mat[j][i] << " ";
+                }
+                else
+                {
+                    stage2<<fixed << setprecision(7) << mattriangle2.mat[j][i] ;
+                }
+            }
+            stage2<< "\n" ;
+        }
+
+        stage2<< "\n";
+
+
+        ///working for stage 3
+
+        double
+
+
+
+
+
+
+
 
 
 
@@ -349,13 +456,28 @@ int main()
 
 
        }
+       else if(command=="push")
+       {
+           matrix temp;
+           temp=stck.top().first;
+           stck.push(make_pair(temp,true));
+       }
 
+       else if(command=="pop")
+       {
+           while(stck.top().second==false)
+           {
+               stck.pop();
+           }
+           stck.pop();
+       }
 
+       else if (command=="end")
+       {
+           break;
+       }
 
     }
-
-
-
 
     return 0;
 }
