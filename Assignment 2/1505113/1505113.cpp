@@ -36,22 +36,6 @@ public:
         }
     }
 
-
-    void printmatrix()
-    {
-
-        for(int i=0;i<4;i++)
-        {
-            for(int j=0;j<4;j++)
-            {
-                cout<< mat[i][j] << " " ;
-            }
-            cout<< "\n";
-        }
-    }
-
-
-
 };
 
 matrix multiplication(matrix m ,matrix n)
@@ -166,7 +150,6 @@ int main()
     cin>> up.x >> up.y >> up.z;
     cin>> fovy >> aspectratio >> near >> far;
 
-
     ///taking the stack
     stack<pair<matrix,bool>> stck;
 
@@ -222,7 +205,7 @@ int main()
 
         mattriangle=multiplication(stck.top().first,triangle1);
 
-        ///working for stage 1
+        ///working for stage 1 :Modeling Transformation
 
         for(int i=0;i<3;i++)
         {
@@ -242,7 +225,7 @@ int main()
 
         stage1<< "\n";
 
-        ///working for stage 2
+        ///working for stage 2 : View Transformation
 
         struct point l,r,u;
 
@@ -333,18 +316,46 @@ int main()
         stage2<< "\n";
 
 
-        ///working for stage 3
+        ///working for stage 3: Projection Transformation
 
-        double
+        double fovx=fovy *aspectratio;
+        double tp=near * tan(fovy/2.0 * pi/180);
+        double rp=near * tan(fovx/2.0 * pi/180);
+
+        ///making P matrix
+
+        matrix P;
+
+        P.mat[0][0]=near/rp;
+        P.mat[1][1]=near/tp;
+        P.mat[2][2]=-(far+near)/(far-near);
+        P.mat[2][3]=-(2*far*near)/ (far-near);
+        P.mat[3][2]=-1.0;
 
 
+        ///applying P on stage 2 matrix to get stage 3 matrix
 
+        matrix mattriangle3;
 
+        mattriangle3=multiplication(P,mattriangle2);
 
+        for(int i=0;i<3;i++)
+        {
+            for(int j=0;j<3;j++)
+            {
+                if(j!=2)
+                {
+                    stage3<<fixed<< setprecision(7) << mattriangle3.mat[j][i]/mattriangle3.mat[3][i] << " ";
+                }
+                else
+                {
+                    stage3<<fixed << setprecision(7) << mattriangle3.mat[j][i]/mattriangle3.mat[3][i] ;
+                }
+            }
+            stage3<< "\n" ;
+        }
 
-
-
-
+        stage3<< "\n";
 
 
        }
