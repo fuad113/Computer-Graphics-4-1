@@ -37,6 +37,18 @@ public:
         }
     }
 
+    void printmatrix()
+    {
+        for(int i=0;i<4;i++)
+        {
+            for(int j=0;j<4;j++)
+            {
+                cout<< mat[i][j] << " ";
+            }
+            cout<< endl;
+        }
+    }
+
 };
 
 matrix multiplication(matrix m,matrix n)
@@ -211,11 +223,11 @@ int main()
                 {
                     if(j!=2)
                     {
-                        stage1<<fixed<< setprecision(7) << mattriangle.mat[j][i] << " ";
+                        stage1<<fixed<< setprecision(7) << mattriangle.mat[j][i]/mattriangle.mat[3][i] << " ";
                     }
                     else
                     {
-                        stage1<<fixed << setprecision(7) << mattriangle.mat[j][i] ;
+                        stage1<<fixed << setprecision(7) << mattriangle.mat[j][i]/mattriangle.mat[3][i] ;
                     }
                 }
                 stage1<< "\n" ;
@@ -301,11 +313,11 @@ int main()
                 {
                     if(j!=2)
                     {
-                        stage2<<fixed<< setprecision(7) << mattriangle2.mat[j][i] << " ";
+                        stage2<<fixed<< setprecision(7) << mattriangle2.mat[j][i]/mattriangle2.mat[3][i] << " ";
                     }
                     else
                     {
-                        stage2<<fixed << setprecision(7) << mattriangle2.mat[j][i] ;
+                        stage2<<fixed << setprecision(7) << mattriangle2.mat[j][i]/mattriangle2.mat[3][i] ;
                     }
                 }
                 stage2<< "\n" ;
@@ -455,7 +467,6 @@ int main()
             rotationmatrix.mat[2][2]= c3.z;
 
             rotationmatrix.mat[3][3]= 1;
-
 
             ///pushing onto the stack
             matrix temp;
