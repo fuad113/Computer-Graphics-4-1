@@ -127,15 +127,14 @@ double differencebetween2points(point a, point b)
 }
 
 ///reflected ray of an incoming ray
-///r=2(a.n)n-a
+///r=a-2(a.n)n
 point getreflectedvector(point vec, point normal)
 {
     point result;
 
     double temp= dotproduct(vec,normal)*2;
     point tempp=mulwithscalar(normal,temp);
-    result=subtract2points(tempp,vec);
-
+    result=subtract2points(vec,tempp);
     return result;
 }
 
@@ -390,13 +389,7 @@ public:
         tplus=(-b+d)/(2*a);
         tminus=(-b-d)/(2*a);
 
-        if(tplus>0)
-        {
-            if(tminus<0)
-                return tminus;
-            else
-                return tplus;
-        }
+        return min(tplus,tminus);
 
     }
 
