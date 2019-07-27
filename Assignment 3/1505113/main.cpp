@@ -8,8 +8,6 @@
 
 #define pi (2*acos(0.0))
 
-#define dbg printf("debugggg\n");
-
 using namespace std;
 
 double cameraHeight;
@@ -246,7 +244,7 @@ public:
 
     }
 
-    void setrefdetails(double am,double deffu,double spe,double refl,int specx)
+    void setrefdetails(double am,double deffu,double spe,double refl,double specex)
     {
         this->am=am;
         this->deffu=deffu;
@@ -449,8 +447,9 @@ public:
             R=normalizepoint(subtract2points(mulwithscalar(N,dotproduct(L,N)*2),L));
 
 
-            V=subtract2points(pos,intersectingpoint);
+            V=subtract2points(rayin.source,intersectingpoint);
             V=normalizepoint(V);
+
 
             point tempsource;
 
@@ -500,18 +499,23 @@ public:
             {
                 double costheta=max(0.0,dotproduct(L,N));
                 double cosphi=max(0.0,dotproduct(R,V));
+
                 diffuse+=costheta*deffu;
                 specular+=pow(cosphi,specex)*spe;
+
+                if(cosphi<0.0)
+                    cosphi=0.0;
+                if(costheta<0.0)
+                    costheta=0.0;
 
             }
 
         }
 
 
-        ///specular kaj kore na
-        colorarray[0]+=(r*(am+diffuse));
-        colorarray[1]+=(g*(am+diffuse));
-        colorarray[2]+=(b*(am+diffuse));
+        colorarray[0]+=(r*(am+diffuse))+specular;
+        colorarray[1]+=(g*(am+diffuse))+specular;
+        colorarray[2]+=(b*(am+diffuse))+specular;
 
 
         if(colorarray[0]>1.0)
@@ -776,22 +780,27 @@ public:
             }
 
 
-            if(flag==false)
+             if(flag==false)
             {
                 double costheta=max(0.0,dotproduct(L,N));
                 double cosphi=max(0.0,dotproduct(R,V));
+
                 diffuse+=costheta*deffu;
                 specular+=pow(cosphi,specex)*spe;
+
+                if(cosphi<0.0)
+                    cosphi=0.0;
+                if(costheta<0.0)
+                    costheta=0.0;
 
             }
 
         }
 
 
-        ///specular kaj kore na
-        colorarray[0]+=(r*(am+diffuse));
-        colorarray[1]+=(g*(am+diffuse));
-        colorarray[2]+=(b*(am+diffuse));
+        colorarray[0]+=(r*(am+diffuse))+specular;
+        colorarray[1]+=(g*(am+diffuse))+specular;
+        colorarray[2]+=(b*(am+diffuse))+specular;
 
 
         if(colorarray[0]>1.0)
@@ -1108,22 +1117,27 @@ public:
             }
 
 
-            if(flag==false)
+             if(flag==false)
             {
                 double costheta=max(0.0,dotproduct(L,N));
                 double cosphi=max(0.0,dotproduct(R,V));
+
                 diffuse+=costheta*deffu;
                 specular+=pow(cosphi,specex)*spe;
+
+                if(cosphi<0.0)
+                    cosphi=0.0;
+                if(costheta<0.0)
+                    costheta=0.0;
 
             }
 
         }
 
 
-        ///specular kaj kore na
-        colorarray[0]+=(r*(am+diffuse));
-        colorarray[1]+=(g*(am+diffuse));
-        colorarray[2]+=(b*(am+diffuse));
+        colorarray[0]+=(r*(am+diffuse))+specular;
+        colorarray[1]+=(g*(am+diffuse))+specular;
+        colorarray[2]+=(b*(am+diffuse))+specular;
 
 
         if(colorarray[0]>1.0)
@@ -1460,12 +1474,12 @@ void specialKeyListener(int key, int x,int y)
 {
     switch(key)
     {
-    case GLUT_KEY_DOWN:		//down arrow key
+    case GLUT_KEY_DOWN:     //down arrow key
         pos.x-=l.x;
         pos.y-=l.y;
         pos.z-=l.z;
         break;
-    case GLUT_KEY_UP:		// up arrow key
+    case GLUT_KEY_UP:       // up arrow key
         pos.x+=l.x;
         pos.y+=l.y;
         pos.z+=l.z;
@@ -1499,12 +1513,12 @@ void specialKeyListener(int key, int x,int y)
 }
 
 
-void mouseListener(int button, int state, int x, int y) 	//x, y is the x-y of the screen (2D)
+void mouseListener(int button, int state, int x, int y)     //x, y is the x-y of the screen (2D)
 {
     switch(button)
     {
     case GLUT_LEFT_BUTTON:
-        if(state == GLUT_DOWN) 		// 2 times?? in ONE click? -- solution is checking DOWN or UP
+        if(state == GLUT_DOWN)      // 2 times?? in ONE click? -- solution is checking DOWN or UP
         {
             drawaxes=1-drawaxes;
         }
@@ -1529,7 +1543,7 @@ void display()
 
     //clear the display
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glClearColor(0,0,0,0);	//color black
+    glClearColor(0,0,0,0);  //color black
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     /********************
@@ -1546,9 +1560,9 @@ void display()
     //2. where is the camera looking?
     //3. Which direction is the camera's UP direction?
 
-    //gluLookAt(100,100,100,	0,0,0,	0,0,1);
-    //gluLookAt(200*cos(cameraAngle), 200*sin(cameraAngle), cameraHeight,		0,0,0,		0,0,1);
-    gluLookAt(pos.x,pos.y,pos.z,	pos.x+l.x,pos.y+l.y,pos.z+l.z,	u.x,u.y,u.z);
+    //gluLookAt(100,100,100,    0,0,0,  0,0,1);
+    //gluLookAt(200*cos(cameraAngle), 200*sin(cameraAngle), cameraHeight,       0,0,0,      0,0,1);
+    gluLookAt(pos.x,pos.y,pos.z,    pos.x+l.x,pos.y+l.y,pos.z+l.z,  u.x,u.y,u.z);
 
 
     //again select MODEL-VIEW
@@ -1606,7 +1620,7 @@ void init()
     cameraHeight=150.0;
     cameraAngle=1.0;
     angle=0;
-    fovY=90;
+    fovY=90.0;
 
     ///initializing pos,u,r,l
 
@@ -1639,7 +1653,7 @@ void init()
     glLoadIdentity();
 
     //give PERSPECTIVE parameters
-    gluPerspective(fovY,	1,	1,	1000.0);
+    gluPerspective(fovY,    1,  1,  1000.0);
     //field of view in the Y (vertically)
     //aspect ratio that determines the field of view in the X direction (horizontally)
     //near distance
@@ -1767,22 +1781,22 @@ int main(int argc, char **argv)
     glutInit(&argc,argv);
     glutInitWindowSize(winheight, winwidth);
     glutInitWindowPosition(0, 0);
-    glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGB);	//Depth, Double buffer, RGB color
+    glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGB);   //Depth, Double buffer, RGB color
 
     glutCreateWindow("My OpenGL Program");
 
     init();
 
-    glEnable(GL_DEPTH_TEST);	//enable Depth Testing
+    glEnable(GL_DEPTH_TEST);    //enable Depth Testing
 
-    glutDisplayFunc(display);	//display callback function
-    glutIdleFunc(animate);		//what you want to do in the idle time (when no drawing is occuring)
+    glutDisplayFunc(display);   //display callback function
+    glutIdleFunc(animate);      //what you want to do in the idle time (when no drawing is occuring)
 
     glutKeyboardFunc(keyboardListener);
     glutSpecialFunc(specialKeyListener);
     glutMouseFunc(mouseListener);
 
-    glutMainLoop();		//The main loop of OpenGL
+    glutMainLoop();     //The main loop of OpenGL
 
     return 0;
 }
