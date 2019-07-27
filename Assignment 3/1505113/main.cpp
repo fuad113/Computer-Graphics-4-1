@@ -132,7 +132,7 @@ point getreflectedvector(point vec, point normal)
 {
     point result;
 
-    double temp= dotproduct(vec,normal)*2;
+    double temp= dotproduct(vec,normal)*2.0;
     point tempp=mulwithscalar(normal,temp);
     result=subtract2points(vec,tempp);
     return result;
@@ -191,22 +191,10 @@ public:
     {
 
     }
-
     ray(point s, point d)
     {
         source=s;
-        direction=d;
-    }
-
-    normalizedirection()
-    {
-
-        double v= sqrt(direction.x *direction.x + direction.y*direction.y + direction.z*direction.z);
-
-        direction.x=direction.x/v;
-        direction.y=direction.y/v;
-        direction.z=direction.z/v;
-
+        direction=normalizepoint(d);
     }
 
 };
@@ -278,15 +266,15 @@ public:
 
     void drawcheckerboard()
     {
-        int tilesize=20;
+        int tilesize=30;
         int counter1=0;
 
 
-        for(int i=-1000;i<=1000;i+=tilesize)
+        for(int i=-3000; i<=3000; i+=tilesize)
         {
             counter1++;
             int counter2=0;
-            for(int j=-1000;j<=1000;j+=tilesize)
+            for(int j=-3000; j<=3000; j+=tilesize)
             {
                 counter2++;
 
@@ -410,9 +398,9 @@ public:
 
         ///setting the color of the object. Multiplying with ambient coefficient
 
-        colorarray[0]= r*am;
-        colorarray[1]= g*am;
-        colorarray[2]= b*am;
+        colorarray[0]= 0;
+        colorarray[1]= 0;
+        colorarray[2]= 0;
 
 
         ///finding the intersecting point r0+t*rd
@@ -428,14 +416,15 @@ public:
         csp.y=spy;
         csp.z=spz;
         ///normal to the surface of the sphere
-        point normal= calculatenormal(intersectingpoint,csp);
+        point normal= normalizepoint(calculatenormal(intersectingpoint,csp));
+
 
         ///reflection of the ray
         point incomingrayreflec;
         incomingrayreflec=getreflectedvector(rayin.direction,normal);
 
         ///work for illumination
-
+        double diffuse=0,specular=0;
         for(int i=0; i<lights.size(); i++)
         {
             point L,N,R,V;
@@ -448,14 +437,26 @@ public:
 
             ///calculate reflection
 
-            R=getreflectedvector(L,N);
+            point tempL;
+
+            tempL.x=-L.x;
+            tempL.y=-L.y;
+            tempL.z=-L.z;
+
+            R=getreflectedvector(tempL,N);
             R=normalizepoint(R);
 
-            V=subtract2points(intersectingpoint,pos);
+            R=normalizepoint(subtract2points(mulwithscalar(N,dotproduct(L,N)*2),L));
+
+
+            V=subtract2points(pos,intersectingpoint);
             V=normalizepoint(V);
 
+            point tempsource;
 
-            ray l(intersectingpoint,L);
+            tempsource= add2points(intersectingpoint,mulwithscalar(L,1.0));
+
+            ray l(tempsource,L);
 
             double lighttoobjdistance=differencebetween2points(lights[i],intersectingpoint);
 
@@ -465,10 +466,30 @@ public:
 
             for(int j=0; j<objects.size(); j++)
             {
-                double tempt=objects[i].spherefindintersectingpoint(l);
 
-                if(tempt>lighttoobjdistance || tempt<=0)
-                    continue;
+                if(objects[j].gettype()=="sphere")
+                {
+                    double tempt=objects[j].spherefindintersectingpoint(l);
+
+                    if(tempt>lighttoobjdistance || tempt<=0)
+                        continue;
+
+                }
+
+                else if(objects[j].gettype()=="checkerboard")
+                {
+                    double tempt=objects[j].checkerboardfindintersectingpoint(l);
+
+                    if(tempt>lighttoobjdistance || tempt<=0)
+                        continue;
+                }
+                else if(objects[j].gettype()=="triangle")
+                {
+                    double tempt=objects[j].trianglefindintersectingpoint(l);
+
+                    if(tempt>lighttoobjdistance || tempt<=0)
+                        continue;
+                }
 
                 flag=true;
                 break;
@@ -477,24 +498,39 @@ public:
 
             if(flag==false)
             {
-
                 double costheta=max(0.0,dotproduct(L,N));
-                double temppho=pow(dotproduct(R,V),specex);
-                double cosphi=max(0.0,temppho);
-
-                for(int j=0; j<3; j++)
-                {
-                    colorarray[j]+=(costheta*deffu*colorarray[j])+ ( cosphi *spe*colorarray[j]);
-                }
+                double cosphi=max(0.0,dotproduct(R,V));
+                diffuse+=costheta*deffu;
+                specular+=pow(cosphi,specex)*spe;
 
             }
 
         }
 
 
+        ///specular kaj kore na
+        colorarray[0]+=(r*(am+diffuse));
+        colorarray[1]+=(g*(am+diffuse));
+        colorarray[2]+=(b*(am+diffuse));
 
-        ///reflection
 
+        if(colorarray[0]>1.0)
+            colorarray[0]=1.0;
+        if(colorarray[0]<0.0)
+            colorarray[0]=0.0;
+
+        if(colorarray[1]>1.0)
+            colorarray[1]=1.0;
+        if(colorarray[1]<0.0)
+            colorarray[1]=0.0;
+
+        if(colorarray[2]>1.0)
+            colorarray[2]=1.0;
+        if(colorarray[2]<0.0)
+            colorarray[2]=0.0;
+
+
+        ///reflection working
         if(level< levelofrec)
         {
             point start,temppoint;
@@ -520,8 +556,29 @@ public:
                         nearestobject=k;
                     }
                 }
-               else
-                continue;
+                else if(objects[k].gettype()=="triangle")
+                {
+                    double t=objects[k].triangleintersect(reflectionray,refcolor,0,objects);
+
+                    if(t>0 and t<tmin)
+                    {
+                        tmin=t;
+                        nearestobject=k;
+                    }
+                }
+
+                else if(objects[k].gettype()=="checkerboard")
+                {
+                    double t=objects[k].checkerboardintersect(reflectionray,refcolor,0,objects);
+
+                    if(t>0 and t<tmin)
+                    {
+                        tmin=t;
+                        nearestobject=k;
+                    }
+                }
+
+
             }
 
             if(nearestobject!=-1)
@@ -530,9 +587,27 @@ public:
                 {
                     objects[nearestobject].sphereintersect(reflectionray,refcolor,level+1,objects);
 
-                    for(int i=0;i<3;i++)
+                    for(int i=0; i<3; i++)
                     {
-                        colorarray[i]+=refcolor[i]*refl ;
+                        colorarray[i]+=refcolor[i]*refl;
+                    }
+                }
+                else if(objects[nearestobject].gettype()=="triangle")
+                {
+                    objects[nearestobject].triangleintersect(reflectionray,refcolor,level+1,objects);
+
+                    for(int i=0; i<3; i++)
+                    {
+                        colorarray[i]+=refcolor[i]*refl;
+                    }
+                }
+                else if(objects[nearestobject].gettype()=="checkerboard")
+                {
+                    objects[nearestobject].checkerboardintersect(reflectionray,refcolor,level+1,objects);
+
+                    for(int i=0; i<3; i++)
+                    {
+                        colorarray[i]+=refcolor[i]*refl;
                     }
                 }
 
@@ -541,7 +616,279 @@ public:
 
         }
 
+        return t;
 
+    }
+
+
+    double checkerboardfindintersectingpoint(ray r)
+    {
+        double temp1,temp2,t;
+
+        temp1=r.source.z;
+        temp2=r.direction.z;
+
+        if(temp2==0)
+            return -1;
+
+        t=(-temp1)/temp2;
+
+        return t;
+
+    }
+
+    double checkerboardintersect(ray rayin,double *colorarray, int level,vector<object> objects)
+    {
+        double t=checkerboardfindintersectingpoint(rayin);
+
+        if(t<=0)
+        {
+            return -1;
+        }
+        if(level==0)
+        {
+            return t;
+        }
+
+        ///finding the intersecting point r0+t*rd
+
+        point intersectingpoint;
+        point temp= mulwithscalar(rayin.direction,t);
+        intersectingpoint=add2points(rayin.source,temp);
+
+
+        ///normal to the surface of the sphere
+        point normal;
+        normal.x=0;
+        normal.y=0;
+        normal.z=1;
+
+        ///reflection of the ray
+        point incomingrayreflec;
+        incomingrayreflec=getreflectedvector(rayin.direction,normal);
+
+        ///setting the color of the object. Multiplying with ambient coefficient
+
+        int inx,iny;
+
+        inx=(intersectingpoint.x+3000)/30;
+        iny=(intersectingpoint.y+3000)/30;
+
+        if(inx%2==0 && iny%2==0)
+        {
+            colorarray[0]=1.0;
+            colorarray[1]=1.0;
+            colorarray[2]=1.0;
+        }
+        else if(inx%2==0 && iny%2!=0)
+        {
+            colorarray[0]=0.0;
+            colorarray[1]=0.0;
+            colorarray[2]=0.0;
+        }
+        else if(inx%2!=0 && iny%2==0)
+        {
+            colorarray[0]=0.0;
+            colorarray[1]=0.0;
+            colorarray[2]=0.0;
+        }
+        else if(inx%2!=0 && iny%2!=0)
+        {
+            colorarray[0]=1.0;
+            colorarray[1]=1.0;
+            colorarray[2]=1.0;
+        }
+
+
+        /*
+                ///work for illumination
+
+                for(int i=0; i<lights.size(); i++)
+                {
+                    point L,N,R,V;
+
+                    L=subtract2points(lights[i],intersectingpoint);
+                    L=normalizepoint(L);
+
+                    N=normal;
+                    N=normalizepoint(N);
+
+                    ///calculate reflection
+
+                    R=getreflectedvector(L,N);
+                    R=normalizepoint(R);
+
+                    V=subtract2points(intersectingpoint,pos);
+                    V=normalizepoint(V);
+
+
+                    ray l(intersectingpoint,L);
+
+                    double lighttoobjdistance=differencebetween2points(lights[i],intersectingpoint);
+
+                    ///now check for each object this ray is obscured or not
+
+                    bool flag=false;
+
+                    for(int j=0; j<objects.size(); j++)
+                    {
+                        if(objects[j].gettype()=="sphere")
+                        {
+                            double tempt=objects[j].spherefindintersectingpoint(l);
+
+                            if(tempt>lighttoobjdistance || tempt<=0)
+                                continue;
+                        }
+
+                        else if(objects[j].gettype()=="checkerboard")
+                        {
+                            double tempt=objects[j].checkerboardfindintersectingpoint(l);
+
+                            if(tempt>lighttoobjdistance || tempt<=0)
+                                continue;
+                        }
+
+                        flag=true;
+                        break;
+                    }
+
+
+                    if(flag==false)
+                    {
+
+                        double costheta=max(0.0,dotproduct(L,N));
+                        double temppho=pow(dotproduct(R,V),specex);
+                        double cosphi=max(0.0,temppho);
+
+                        for(int j=0; j<3; j++)
+                        {
+                            colorarray[j]+=(costheta*deffu*colorarray[j])+ ( cosphi *spe* 1.0);
+                        }
+
+                    }
+
+                }
+        */
+
+        return t;
+
+    }
+
+    double trianglefindintersectingpoint(ray r)
+    {
+        double ep=0.0000001;
+        point triver0,triver1,triver2;
+
+        triver0.x=p1x;
+        triver0.y=p1y;
+        triver0.z=p1z;
+
+        triver1.x=p2x;
+        triver1.y=p2y;
+        triver1.z=p2z;
+
+        triver2.x=p3x;
+        triver2.y=p3y;
+        triver2.z=p3z;
+
+        point ed1,ed2,h,s,q;
+        double a,f,u,v;
+
+        ed1=subtract2points(triver1,triver0);
+        ed2=subtract2points(triver2,triver0);
+
+        h=crossproduct(r.direction,ed2);
+        a=dotproduct(ed1,h);
+
+        if(a> -ep && a< ep)
+        {
+            return -1; ///ray is parallel to the triangle
+        }
+
+        f=1.0/a;
+        s=subtract2points(r.source,triver0);
+        u=f* dotproduct(s,h);
+
+        if(u< 0.0 || u> 1.0)
+        {
+            return -1;
+        }
+
+        q=crossproduct(s,ed1);
+        v=f*dotproduct(r.direction,q);
+
+
+        if(v< 0.0 || u+v> 1.0)
+        {
+            return -1;
+        }
+
+        double t=f*dotproduct(ed2,q);
+
+        if(t>ep)
+            return t;
+        else
+            return -1;
+
+    }
+
+    double triangleintersect(ray rayin,double *colorarray, int level,vector<object> objects)
+    {
+
+        double t=trianglefindintersectingpoint(rayin);
+
+
+        if(t<=0)
+        {
+            return -1;
+        }
+        if(level==0)
+        {
+            return t;
+        }
+
+        ///setting the color of the object. Multiplying with ambient coefficient
+
+
+        colorarray[0]= r*am;
+        colorarray[1]= g*am;
+        colorarray[2]= b*am;
+
+
+        ///finding the intersecting point r0+t*rd
+
+        point intersectingpoint;
+        point temp= mulwithscalar(rayin.direction,t);
+        intersectingpoint=add2points(rayin.source,temp);
+
+
+        ///normal to the surface of the triangle
+        point normal;
+
+        point p1,p2,p3;
+        point sub1,sub2;
+
+        p1.x=p1x;
+        p1.y=p1y;
+        p1.z=p1z;
+
+        p2.x=p2x;
+        p2.y=p2y;
+        p2.z=p2z;
+
+        p3.x=p3x;
+        p3.y=p3y;
+        p3.z=p3z;
+
+        sub1=subtract2points(p2,p1);
+        sub2=subtract2points(p3,p1);
+
+        normal=crossproduct(sub1,sub2);
+
+
+        ///reflection of the ray
+        point incomingrayreflec;
+        incomingrayreflec=getreflectedvector(rayin.direction,normal);
 
         return t;
 
@@ -594,6 +941,12 @@ void capture()
 
     double *colorarray =new double[3];
 
+    for(int i=0; i<3; i++)
+    {
+        colorarray[i]=0.0;
+    }
+    cout<< "start" << endl;
+
     for(int i=0; i<pixelno; i++)
     {
         for(int j=0; j<pixelno; j++)
@@ -609,7 +962,6 @@ void capture()
 
             point raydir=subtract2points(cor,pos);
             ray r(pos,raydir);
-            r.normalizedirection();
 
             int nearestobject=-1;
             double tmin=100000000000;
@@ -626,9 +978,30 @@ void capture()
                         nearestobject=k;
                     }
                 }
-                else
-                    continue;
+                else if(objs[k].gettype()=="checkerboard")
+                {
+                    double t=objs[k].checkerboardintersect(r,colorarray,0,objs);
+
+                    if(t>0 and t<tmin)
+                    {
+                        tmin=t;
+                        nearestobject=k;
+                    }
+                }
+                else if(objs[k].gettype()=="triangle")
+                {
+                    double t=objs[k].triangleintersect(r,colorarray,0,objs);
+
+                    if(t>0 and t<tmin)
+                    {
+                        tmin=t;
+                        nearestobject=k;
+                    }
+                }
+
+
             }
+
 
             if(nearestobject!=-1)
             {
@@ -637,9 +1010,15 @@ void capture()
                     objs[nearestobject].sphereintersect(r,colorarray,1,objs);
                     image.set_pixel(j,i,255*colorarray[0],255*colorarray[1],255*colorarray[2]);
                 }
-                else
+                else if(objs[nearestobject].gettype()=="checkerboard")
                 {
-                    image.set_pixel(j,i,255,255,255);
+                    objs[nearestobject].checkerboardintersect(r,colorarray,1,objs);
+                    image.set_pixel(j,i,255*colorarray[0],255*colorarray[1],255*colorarray[2]);
+                }
+                else if(objs[nearestobject].gettype()=="triangle")
+                {
+                    objs[nearestobject].triangleintersect(r,colorarray,1,objs);
+                    image.set_pixel(j,i,255*colorarray[0],255*colorarray[1],255*colorarray[2]);
                 }
 
             }
@@ -649,7 +1028,7 @@ void capture()
     }
 
     image.save_image("1505113_output.bmp");
-    cout<<"chobi tula hoise" << endl;
+    cout<<"pic captured" << endl;
 
 }
 
@@ -932,7 +1311,7 @@ int main(int argc, char **argv)
     double pr,pg,pb;
 
     object floor("checkerboard");
-    floor.setrefdetails(0.3,0.3,0.3,0.1,1);
+    floor.setrefdetails(0.4,0.2,0.2,0.2,1);
     objs.push_back(floor);
 
 
