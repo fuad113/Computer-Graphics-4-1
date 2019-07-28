@@ -379,11 +379,103 @@ public:
 
     }
 
+    double sphereintersect(ray rayin,double *colorarray, int level);
 
-    double sphereintersect(ray rayin,double *colorarray, int level,vector<object> objects)
+    double checkerboardfindintersectingpoint(ray r)
+    {
+        double temp1,temp2,t;
+
+        temp1=r.source.z;
+        temp2=r.direction.z;
+
+        if(temp2==0)
+            return -1;
+
+        t=(-temp1)/temp2;
+
+        return t;
+
+    }
+
+    double checkerboardintersect(ray rayin,double *colorarray, int level);
+
+    double trianglefindintersectingpoint(ray r)
+    {
+        double ep=0.0000001;
+        point triver0,triver1,triver2;
+
+        triver0.x=p1x;
+        triver0.y=p1y;
+        triver0.z=p1z;
+
+        triver1.x=p2x;
+        triver1.y=p2y;
+        triver1.z=p2z;
+
+        triver2.x=p3x;
+        triver2.y=p3y;
+        triver2.z=p3z;
+
+        point ed1,ed2,h,s,q;
+        double a,f,u,v;
+
+        ed1=subtract2points(triver1,triver0);
+        ed2=subtract2points(triver2,triver0);
+
+        h=crossproduct(r.direction,ed2);
+        a=dotproduct(ed1,h);
+
+        if(a> -ep && a< ep)
+        {
+            return -1; ///ray is parallel to the triangle
+        }
+
+        f=1.0/a;
+        s=subtract2points(r.source,triver0);
+        u=f* dotproduct(s,h);
+
+        if(u< 0.0 || u> 1.0)
+        {
+            return -1;
+        }
+
+        q=crossproduct(s,ed1);
+        v=f*dotproduct(r.direction,q);
+
+
+        if(v< 0.0 || u+v> 1.0)
+        {
+            return -1;
+        }
+
+        double t=f*dotproduct(ed2,q);
+
+        if(t>ep)
+            return t;
+        else
+            return -1;
+
+    }
+
+    double triangleintersect(ray rayin,double *colorarray, int level);
+
+
+    string gettype()
+    {
+        return type;
+    }
+
+
+};
+
+ ///global vector for objects
+    vector<object> objs;
+
+
+    double object::triangleintersect(ray rayin,double *colorarray, int level)
     {
 
-        double t=spherefindintersectingpoint(rayin);
+        double t=trianglefindintersectingpoint(rayin);
 
         if(t<=0)
         {
@@ -396,9 +488,10 @@ public:
 
         ///setting the color of the object. Multiplying with ambient coefficient
 
-        colorarray[0]= 0;
-        colorarray[1]= 0;
-        colorarray[2]= 0;
+
+        colorarray[0]= r;
+        colorarray[1]= g;
+        colorarray[2]= b;
 
 
         ///finding the intersecting point r0+t*rd
@@ -407,19 +500,36 @@ public:
         point temp= mulwithscalar(rayin.direction,t);
         intersectingpoint=add2points(rayin.source,temp);
 
-        ///normalize the point with intersectingpoint and the centre (?)
-        ///make sphere centre a point
-        point csp; ///sphere center
-        csp.x=spx;
-        csp.y=spy;
-        csp.z=spz;
-        ///normal to the surface of the sphere
-        point normal= normalizepoint(calculatenormal(intersectingpoint,csp));
+
+        ///normal to the surface of the triangle
+        point normal;
+
+        point p1,p2,p3;
+        point sub1,sub2;
+
+        p1.x=p1x;
+        p1.y=p1y;
+        p1.z=p1z;
+
+        p2.x=p2x;
+        p2.y=p2y;
+        p2.z=p2z;
+
+        p3.x=p3x;
+        p3.y=p3y;
+        p3.z=p3z;
+
+        sub1=subtract2points(p2,p1);
+        sub2=subtract2points(p3,p1);
+
+        normal=crossproduct(sub1,sub2);
+        normal=normalizepoint(normal);
 
 
         ///reflection of the ray
         point incomingrayreflec;
         incomingrayreflec=getreflectedvector(rayin.direction,normal);
+        incomingrayreflec=normalizepoint(incomingrayreflec);
 
         ///work for illumination
         double diffuse=0,specular=0;
@@ -447,9 +557,8 @@ public:
             R=normalizepoint(subtract2points(mulwithscalar(N,dotproduct(L,N)*2),L));
 
 
-            V=subtract2points(rayin.source,intersectingpoint);
+            V=subtract2points(pos,intersectingpoint);
             V=normalizepoint(V);
-
 
             point tempsource;
 
@@ -463,28 +572,28 @@ public:
 
             bool flag=false;
 
-            for(int j=0; j<objects.size(); j++)
+            for(int j=0; j<objs.size(); j++)
             {
 
-                if(objects[j].gettype()=="sphere")
+                if(objs[j].gettype()=="sphere")
                 {
-                    double tempt=objects[j].spherefindintersectingpoint(l);
+                    double tempt=objs[j].spherefindintersectingpoint(l);
 
                     if(tempt>lighttoobjdistance || tempt<=0)
                         continue;
 
                 }
 
-                else if(objects[j].gettype()=="checkerboard")
+                else if(objs[j].gettype()=="checkerboard")
                 {
-                    double tempt=objects[j].checkerboardfindintersectingpoint(l);
+                    double tempt=objs[j].checkerboardfindintersectingpoint(l);
 
                     if(tempt>lighttoobjdistance || tempt<=0)
                         continue;
                 }
-                else if(objects[j].gettype()=="triangle")
+                else if(objs[j].gettype()=="triangle")
                 {
-                    double tempt=objects[j].trianglefindintersectingpoint(l);
+                    double tempt=objs[j].trianglefindintersectingpoint(l);
 
                     if(tempt>lighttoobjdistance || tempt<=0)
                         continue;
@@ -495,7 +604,7 @@ public:
             }
 
 
-            if(flag==false)
+             if(flag==false)
             {
                 double costheta=max(0.0,dotproduct(L,N));
                 double cosphi=max(0.0,dotproduct(R,V));
@@ -547,11 +656,16 @@ public:
             double tmin=100000000000;
             double *refcolor=new double[3];
 
-            for(int k=0; k<objects.size(); k++)
+            for(int i=0; i<3; i++)
             {
-                if(objects[k].gettype()=="sphere")
+                refcolor[i]=0.0;
+            }
+
+            for(int k=0; k<objs.size(); k++)
+            {
+                if(objs[k].gettype()=="sphere")
                 {
-                    double t=objects[k].sphereintersect(reflectionray,refcolor,0,objects);
+                    double t=objs[k].sphereintersect(reflectionray,refcolor,0);
 
                     if(t>0 && t<tmin)
                     {
@@ -559,9 +673,9 @@ public:
                         nearestobject=k;
                     }
                 }
-                else if(objects[k].gettype()=="triangle")
+                else if(objs[k].gettype()=="triangle")
                 {
-                    double t=objects[k].triangleintersect(reflectionray,refcolor,0,objects);
+                    double t=objs[k].triangleintersect(reflectionray,refcolor,0);
 
                     if(t>0 && t<tmin)
                     {
@@ -570,9 +684,9 @@ public:
                     }
                 }
 
-                else if(objects[k].gettype()=="checkerboard")
+                else if(objs[k].gettype()=="checkerboard")
                 {
-                    double t=objects[k].checkerboardintersect(reflectionray,refcolor,0,objects);
+                    double t=objs[k].checkerboardintersect(reflectionray,refcolor,0);
 
                     if(t>0 && t<tmin)
                     {
@@ -586,36 +700,47 @@ public:
 
             if(nearestobject!=-1)
             {
-                if(objects[nearestobject].gettype()=="sphere")
+                if(objs[nearestobject].gettype()=="sphere")
                 {
-                    objects[nearestobject].sphereintersect(reflectionray,refcolor,level+1,objects);
+                    objs[nearestobject].sphereintersect(reflectionray,refcolor,level+1);
 
                     for(int i=0; i<3; i++)
                     {
                         colorarray[i]+=refcolor[i]*refl;
+                        if(colorarray[i]>1.0)
+                            colorarray[i]=1.0;
+                        if(colorarray[i]<0.0)
+                            colorarray[i]=0.0;
                     }
                 }
-                else if(objects[nearestobject].gettype()=="triangle")
+                else if(objs[nearestobject].gettype()=="triangle")
                 {
-                    objects[nearestobject].triangleintersect(reflectionray,refcolor,level+1,objects);
+                    objs[nearestobject].triangleintersect(reflectionray,refcolor,level+1);
 
                     for(int i=0; i<3; i++)
                     {
                         colorarray[i]+=refcolor[i]*refl;
+                        if(colorarray[i]>1.0)
+                            colorarray[i]=1.0;
+                        if(colorarray[i]<0.0)
+                            colorarray[i]=0.0;
                     }
                 }
-                else if(objects[nearestobject].gettype()=="checkerboard")
+                else if(objs[nearestobject].gettype()=="checkerboard")
                 {
-                    objects[nearestobject].checkerboardintersect(reflectionray,refcolor,level+1,objects);
+                    objs[nearestobject].checkerboardintersect(reflectionray,refcolor,level+1);
 
                     for(int i=0; i<3; i++)
                     {
                         colorarray[i]+=refcolor[i]*refl;
+                        if(colorarray[i]>1.0)
+                            colorarray[i]=1.0;
+                        if(colorarray[i]<0.0)
+                            colorarray[i]=0.0;
                     }
                 }
 
             }
-
             delete []refcolor;
 
         }
@@ -625,23 +750,7 @@ public:
     }
 
 
-    double checkerboardfindintersectingpoint(ray r)
-    {
-        double temp1,temp2,t;
-
-        temp1=r.source.z;
-        temp2=r.direction.z;
-
-        if(temp2==0)
-            return -1;
-
-        t=(-temp1)/temp2;
-
-        return t;
-
-    }
-
-    double checkerboardintersect(ray rayin,double *colorarray, int level,vector<object> objects)
+    double object::checkerboardintersect(ray rayin,double *colorarray, int level)
     {
         double t=checkerboardfindintersectingpoint(rayin);
 
@@ -748,28 +857,28 @@ public:
 
             bool flag=false;
 
-            for(int j=0; j<objects.size(); j++)
+            for(int j=0; j<objs.size(); j++)
             {
 
-                if(objects[j].gettype()=="sphere")
+                if(objs[j].gettype()=="sphere")
                 {
-                    double tempt=objects[j].spherefindintersectingpoint(l);
+                    double tempt=objs[j].spherefindintersectingpoint(l);
 
                     if(tempt>lighttoobjdistance || tempt<=0)
                         continue;
 
                 }
 
-                else if(objects[j].gettype()=="checkerboard")
+                else if(objs[j].gettype()=="checkerboard")
                 {
-                    double tempt=objects[j].checkerboardfindintersectingpoint(l);
+                    double tempt=objs[j].checkerboardfindintersectingpoint(l);
 
                     if(tempt>lighttoobjdistance || tempt<=0)
                         continue;
                 }
-                else if(objects[j].gettype()=="triangle")
+                else if(objs[j].gettype()=="triangle")
                 {
-                    double tempt=objects[j].trianglefindintersectingpoint(l);
+                    double tempt=objs[j].trianglefindintersectingpoint(l);
 
                     if(tempt>lighttoobjdistance || tempt<=0)
                         continue;
@@ -837,11 +946,11 @@ public:
                 refcolor[i]=0.0;
             }
 
-            for(int k=0; k<objects.size(); k++)
+            for(int k=0; k<objs.size(); k++)
             {
-                if(objects[k].gettype()=="sphere")
+                if(objs[k].gettype()=="sphere")
                 {
-                    double t=objects[k].sphereintersect(reflectionray,refcolor,0,objects);
+                    double t=objs[k].sphereintersect(reflectionray,refcolor,0);
 
                     if(t>0 && t<tmin)
                     {
@@ -849,9 +958,9 @@ public:
                         nearestobject=k;
                     }
                 }
-                else if(objects[k].gettype()=="triangle")
+                else if(objs[k].gettype()=="triangle")
                 {
-                    double t=objects[k].triangleintersect(reflectionray,refcolor,0,objects);
+                    double t=objs[k].triangleintersect(reflectionray,refcolor,0);
 
                     if(t>0 && t<tmin)
                     {
@@ -860,9 +969,9 @@ public:
                     }
                 }
 
-                else if(objects[k].gettype()=="checkerboard")
+                else if(objs[k].gettype()=="checkerboard")
                 {
-                    double t=objects[k].checkerboardintersect(reflectionray,refcolor,0,objects);
+                    double t=objs[k].checkerboardintersect(reflectionray,refcolor,0);
 
                     if(t>0 && t<tmin)
                     {
@@ -876,9 +985,9 @@ public:
 
             if(nearestobject!=-1)
             {
-                if(objects[nearestobject].gettype()=="sphere")
+                if(objs[nearestobject].gettype()=="sphere")
                 {
-                    objects[nearestobject].sphereintersect(reflectionray,refcolor,level+1,objects);
+                    objs[nearestobject].sphereintersect(reflectionray,refcolor,level+1);
 
                     for(int i=0; i<3; i++)
                     {
@@ -889,9 +998,9 @@ public:
                             colorarray[i]=0.0;
                     }
                 }
-                else if(objects[nearestobject].gettype()=="triangle")
+                else if(objs[nearestobject].gettype()=="triangle")
                 {
-                    objects[nearestobject].triangleintersect(reflectionray,refcolor,level+1,objects);
+                    objs[nearestobject].triangleintersect(reflectionray,refcolor,level+1);
 
                     for(int i=0; i<3; i++)
                     {
@@ -903,9 +1012,9 @@ public:
                     }
                 }
 
-                else if(objects[nearestobject].gettype()=="checkerboard")
+                else if(objs[nearestobject].gettype()=="checkerboard")
                 {
-                    objects[nearestobject].checkerboardintersect(reflectionray,refcolor,level+1,objects);
+                    objs[nearestobject].checkerboardintersect(reflectionray,refcolor,level+1);
 
                     for(int i=0; i<3; i++)
                     {
@@ -927,68 +1036,10 @@ public:
 
     }
 
-    double trianglefindintersectingpoint(ray r)
-    {
-        double ep=0.0000001;
-        point triver0,triver1,triver2;
-
-        triver0.x=p1x;
-        triver0.y=p1y;
-        triver0.z=p1z;
-
-        triver1.x=p2x;
-        triver1.y=p2y;
-        triver1.z=p2z;
-
-        triver2.x=p3x;
-        triver2.y=p3y;
-        triver2.z=p3z;
-
-        point ed1,ed2,h,s,q;
-        double a,f,u,v;
-
-        ed1=subtract2points(triver1,triver0);
-        ed2=subtract2points(triver2,triver0);
-
-        h=crossproduct(r.direction,ed2);
-        a=dotproduct(ed1,h);
-
-        if(a> -ep && a< ep)
-        {
-            return -1; ///ray is parallel to the triangle
-        }
-
-        f=1.0/a;
-        s=subtract2points(r.source,triver0);
-        u=f* dotproduct(s,h);
-
-        if(u< 0.0 || u> 1.0)
-        {
-            return -1;
-        }
-
-        q=crossproduct(s,ed1);
-        v=f*dotproduct(r.direction,q);
-
-
-        if(v< 0.0 || u+v> 1.0)
-        {
-            return -1;
-        }
-
-        double t=f*dotproduct(ed2,q);
-
-        if(t>ep)
-            return t;
-        else
-            return -1;
-
-    }
-
-    double triangleintersect(ray rayin,double *colorarray, int level,vector<object> objects)
+    double object::sphereintersect(ray rayin,double *colorarray, int level)
     {
 
-        double t=trianglefindintersectingpoint(rayin);
+        double t=spherefindintersectingpoint(rayin);
 
         if(t<=0)
         {
@@ -1001,10 +1052,9 @@ public:
 
         ///setting the color of the object. Multiplying with ambient coefficient
 
-
-        colorarray[0]= r;
-        colorarray[1]= g;
-        colorarray[2]= b;
+        colorarray[0]= 0;
+        colorarray[1]= 0;
+        colorarray[2]= 0;
 
 
         ///finding the intersecting point r0+t*rd
@@ -1013,36 +1063,19 @@ public:
         point temp= mulwithscalar(rayin.direction,t);
         intersectingpoint=add2points(rayin.source,temp);
 
-
-        ///normal to the surface of the triangle
-        point normal;
-
-        point p1,p2,p3;
-        point sub1,sub2;
-
-        p1.x=p1x;
-        p1.y=p1y;
-        p1.z=p1z;
-
-        p2.x=p2x;
-        p2.y=p2y;
-        p2.z=p2z;
-
-        p3.x=p3x;
-        p3.y=p3y;
-        p3.z=p3z;
-
-        sub1=subtract2points(p2,p1);
-        sub2=subtract2points(p3,p1);
-
-        normal=crossproduct(sub1,sub2);
-        normal=normalizepoint(normal);
+        ///normalize the point with intersectingpoint and the centre (?)
+        ///make sphere centre a point
+        point csp; ///sphere center
+        csp.x=spx;
+        csp.y=spy;
+        csp.z=spz;
+        ///normal to the surface of the sphere
+        point normal= normalizepoint(calculatenormal(intersectingpoint,csp));
 
 
         ///reflection of the ray
         point incomingrayreflec;
         incomingrayreflec=getreflectedvector(rayin.direction,normal);
-        incomingrayreflec=normalizepoint(incomingrayreflec);
 
         ///work for illumination
         double diffuse=0,specular=0;
@@ -1070,8 +1103,9 @@ public:
             R=normalizepoint(subtract2points(mulwithscalar(N,dotproduct(L,N)*2),L));
 
 
-            V=subtract2points(pos,intersectingpoint);
+            V=subtract2points(rayin.source,intersectingpoint);
             V=normalizepoint(V);
+
 
             point tempsource;
 
@@ -1085,28 +1119,28 @@ public:
 
             bool flag=false;
 
-            for(int j=0; j<objects.size(); j++)
+            for(int j=0; j<objs.size(); j++)
             {
 
-                if(objects[j].gettype()=="sphere")
+                if(objs[j].gettype()=="sphere")
                 {
-                    double tempt=objects[j].spherefindintersectingpoint(l);
+                    double tempt=objs[j].spherefindintersectingpoint(l);
 
                     if(tempt>lighttoobjdistance || tempt<=0)
                         continue;
 
                 }
 
-                else if(objects[j].gettype()=="checkerboard")
+                else if(objs[j].gettype()=="checkerboard")
                 {
-                    double tempt=objects[j].checkerboardfindintersectingpoint(l);
+                    double tempt=objs[j].checkerboardfindintersectingpoint(l);
 
                     if(tempt>lighttoobjdistance || tempt<=0)
                         continue;
                 }
-                else if(objects[j].gettype()=="triangle")
+                else if(objs[j].gettype()=="triangle")
                 {
-                    double tempt=objects[j].trianglefindintersectingpoint(l);
+                    double tempt=objs[j].trianglefindintersectingpoint(l);
 
                     if(tempt>lighttoobjdistance || tempt<=0)
                         continue;
@@ -1117,7 +1151,7 @@ public:
             }
 
 
-             if(flag==false)
+            if(flag==false)
             {
                 double costheta=max(0.0,dotproduct(L,N));
                 double cosphi=max(0.0,dotproduct(R,V));
@@ -1169,16 +1203,11 @@ public:
             double tmin=100000000000;
             double *refcolor=new double[3];
 
-            for(int i=0; i<3; i++)
+            for(int k=0; k<objs.size(); k++)
             {
-                refcolor[i]=0.0;
-            }
-
-            for(int k=0; k<objects.size(); k++)
-            {
-                if(objects[k].gettype()=="sphere")
+                if(objs[k].gettype()=="sphere")
                 {
-                    double t=objects[k].sphereintersect(reflectionray,refcolor,0,objects);
+                    double t=objs[k].sphereintersect(reflectionray,refcolor,0);
 
                     if(t>0 && t<tmin)
                     {
@@ -1186,9 +1215,9 @@ public:
                         nearestobject=k;
                     }
                 }
-                else if(objects[k].gettype()=="triangle")
+                else if(objs[k].gettype()=="triangle")
                 {
-                    double t=objects[k].triangleintersect(reflectionray,refcolor,0,objects);
+                    double t=objs[k].triangleintersect(reflectionray,refcolor,0);
 
                     if(t>0 && t<tmin)
                     {
@@ -1197,9 +1226,9 @@ public:
                     }
                 }
 
-                else if(objects[k].gettype()=="checkerboard")
+                else if(objs[k].gettype()=="checkerboard")
                 {
-                    double t=objects[k].checkerboardintersect(reflectionray,refcolor,0,objects);
+                    double t=objs[k].checkerboardintersect(reflectionray,refcolor,0);
 
                     if(t>0 && t<tmin)
                     {
@@ -1213,47 +1242,36 @@ public:
 
             if(nearestobject!=-1)
             {
-                if(objects[nearestobject].gettype()=="sphere")
+                if(objs[nearestobject].gettype()=="sphere")
                 {
-                    objects[nearestobject].sphereintersect(reflectionray,refcolor,level+1,objects);
+                    objs[nearestobject].sphereintersect(reflectionray,refcolor,level+1);
 
                     for(int i=0; i<3; i++)
                     {
                         colorarray[i]+=refcolor[i]*refl;
-                        if(colorarray[i]>1.0)
-                            colorarray[i]=1.0;
-                        if(colorarray[i]<0.0)
-                            colorarray[i]=0.0;
                     }
                 }
-                else if(objects[nearestobject].gettype()=="triangle")
+                else if(objs[nearestobject].gettype()=="triangle")
                 {
-                    objects[nearestobject].triangleintersect(reflectionray,refcolor,level+1,objects);
+                    objs[nearestobject].triangleintersect(reflectionray,refcolor,level+1);
 
                     for(int i=0; i<3; i++)
                     {
                         colorarray[i]+=refcolor[i]*refl;
-                        if(colorarray[i]>1.0)
-                            colorarray[i]=1.0;
-                        if(colorarray[i]<0.0)
-                            colorarray[i]=0.0;
                     }
                 }
-                else if(objects[nearestobject].gettype()=="checkerboard")
+                else if(objs[nearestobject].gettype()=="checkerboard")
                 {
-                    objects[nearestobject].checkerboardintersect(reflectionray,refcolor,level+1,objects);
+                    objs[nearestobject].checkerboardintersect(reflectionray,refcolor,level+1);
 
                     for(int i=0; i<3; i++)
                     {
                         colorarray[i]+=refcolor[i]*refl;
-                        if(colorarray[i]>1.0)
-                            colorarray[i]=1.0;
-                        if(colorarray[i]<0.0)
-                            colorarray[i]=0.0;
                     }
                 }
 
             }
+
             delete []refcolor;
 
         }
@@ -1262,17 +1280,6 @@ public:
 
     }
 
-
-    string gettype()
-    {
-        return type;
-    }
-
-
-};
-
-///global vector for objects
-vector<object> objs;
 
 
 void capture()
@@ -1338,7 +1345,7 @@ void capture()
             {
                 if(objs[k].gettype()=="sphere")
                 {
-                    double t=objs[k].sphereintersect(r,colorarray,0,objs);
+                    double t=objs[k].sphereintersect(r,colorarray,0);
 
                     if(t>0 && t<tmin)
                     {
@@ -1348,7 +1355,7 @@ void capture()
                 }
                 else if(objs[k].gettype()=="checkerboard")
                 {
-                    double t=objs[k].checkerboardintersect(r,colorarray,0,objs);
+                    double t=objs[k].checkerboardintersect(r,colorarray,0);
 
                     if(t>0 && t<tmin)
                     {
@@ -1358,7 +1365,7 @@ void capture()
                 }
                 else if(objs[k].gettype()=="triangle")
                 {
-                    double t=objs[k].triangleintersect(r,colorarray,0,objs);
+                    double t=objs[k].triangleintersect(r,colorarray,0);
 
                     if(t>0 && t<tmin)
                     {
@@ -1375,17 +1382,17 @@ void capture()
             {
                 if(objs[nearestobject].gettype()=="sphere")
                 {
-                    objs[nearestobject].sphereintersect(r,colorarray,1,objs);
+                    objs[nearestobject].sphereintersect(r,colorarray,1);
                     image.set_pixel(j,i,255*colorarray[0],255*colorarray[1],255*colorarray[2]);
                 }
                 else if(objs[nearestobject].gettype()=="checkerboard")
                 {
-                    objs[nearestobject].checkerboardintersect(r,colorarray,1,objs);
+                    objs[nearestobject].checkerboardintersect(r,colorarray,1);
                     image.set_pixel(j,i,255*colorarray[0],255*colorarray[1],255*colorarray[2]);
                 }
                 else if(objs[nearestobject].gettype()=="triangle")
                 {
-                    objs[nearestobject].triangleintersect(r,colorarray,1,objs);
+                    objs[nearestobject].triangleintersect(r,colorarray,1);
                     image.set_pixel(j,i,255*colorarray[0],255*colorarray[1],255*colorarray[2]);
                 }
 

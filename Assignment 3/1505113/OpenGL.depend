@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1564224260 source:d:\offlines 4-1\computer-graphics-4-1\assignment 3\1505113\main.cpp
+1564333720 source:d:\offlines 4-1\computer-graphics-4-1\assignment 3\1505113\main.cpp
 	<stdio.h>
 	<stdlib.h>
 	<math.h>
@@ -14,6 +14,30 @@
 	<GL/glu.h>
 
 1479975262 d:\offlines 4-1\computer-graphics-4-1\assignment 3\1505113\bitmap_image.hpp
+	<algorithm>
+	<cmath>
+	<cstdlib>
+	<fstream>
+	<iostream>
+	<iterator>
+	<limits>
+	<string>
+
+1564333720 source:d:\offlines 4-1\computer-graphics-4-1\assignment 3\1505113 - a slight modified in code\main.cpp
+	<stdio.h>
+	<stdlib.h>
+	<math.h>
+	<bits/stdc++.h>
+	<windows.h>
+	<glut.h>
+	"bitmap_image.hpp"
+
+1392007564 d:\offlines 4-1\computer-graphics-4-1\assignment 3\1505113 - a slight modified in code\opengl\include\glut.h
+	<windows.h>
+	<GL/gl.h>
+	<GL/glu.h>
+
+1479975262 d:\offlines 4-1\computer-graphics-4-1\assignment 3\1505113 - a slight modified in code\bitmap_image.hpp
 	<algorithm>
 	<cmath>
 	<cstdlib>
